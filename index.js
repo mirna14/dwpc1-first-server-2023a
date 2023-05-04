@@ -1,6 +1,10 @@
 import http from "http";
+import path from "path";
+import { promises as fs } from 'fs';
 
-const server = http.createServer((req, res) => {
+global["__dirname"] = path.dirname(new URL(import.meta.url).pathname);
+
+const server = http.createServer(async (req, res) => {
    // Desestructurando de "req"
    let { url, method } = req;
 
@@ -16,7 +20,7 @@ switch (url) {
     res.write(`
     <html>
       <head>
-        <link rel="icon" type="image/png" sizes="32x32" href="https://img.icons8.com/fluency/256/domain.png">
+      <link rel="icon" type="image/x-icon" sizes="32x32" href="/favicon.ico">
         <title>My App</title>
       </head>
       <body> 
@@ -31,6 +35,39 @@ switch (url) {
     // Cerrando la comunicacion
     res.end();
     break;
+    case "/favicon.ico":
+      // Especificar la ubicación del archivo de icono
+      const faviconPath = path.join(__dirname, 'favicon.ico');
+      try{
+        const data = await fs.readFile(faviconPath);
+        res.writeHead(200, {'Content-Type': 'image/x-icon'});
+        res.end(data);
+      }catch (err) {
+        console.error(err);
+        // Peticion raiz
+        // Estableciendo cabeceras
+        res.setHeader('Content-Type', 'text/html');
+        // Escribiendo la respuesta
+        res.write(`
+        <html>
+          <head>
+            <link rel="icon" type="image/x-icon" sizes="32x32" href="/favicon.ico">
+            <title>My App</title>
+          </head>
+          <body> 
+            <h1>&#128534; 500 El server esta fuera de servicio</h1>
+            <p>Lo sentimos pero hubo un error en nuestro server...</p>
+            <p> ${err.message}</p>
+          </body>
+        </html>
+        `);
+        console.log(`📣 Respondiendo: 500 ${req.url} ${req.method}`);
+        // Estableciendo codigo de respuesta
+        res.statusCode = 500;
+        // Cerrando la comunicacion
+        res.end();
+      }
+      break
   default:
     // Peticion raiz
     // Estableciendo cabeceras
@@ -39,7 +76,6 @@ switch (url) {
     res.write(`
     <html>
       <head>
-        <link rel="icon" type="image/png" sizes="32x32" href="https://img.icons8.com/fluency/256/domain.png">
         <title>My App</title>
       </head>
       <body> 
@@ -63,7 +99,7 @@ switch (url) {
       res.write(`
       <html>
         <head>
-          <link rel="icon" type="image/png" sizes="32x32" href="https://img.icons8.com/fluency/256/domain.png">
+        <link rel="icon" type="image/x-icon" sizes="32x32" href="/favicon.ico">
           <title>My App</title>
         </head>
         <body style="text-align: center;">
